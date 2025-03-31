@@ -16,7 +16,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.postgresql:postgresql:42.6.0")
     implementation("org.hibernate:hibernate-core:6.3.1.Final")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
