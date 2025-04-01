@@ -1,6 +1,6 @@
 package itmo.polyakov.controllers
 
-import itmo.polyakov.queueServices.PersonConsumerService
+import itmo.polyakov.services.PersonConsumerService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RestController
 class PersonController(private val personConsumerService: PersonConsumerService) {
 
     @GetMapping
-    fun getFirstPerson(): ResponseEntity<Map<String, Any>> {
-        val person = personConsumerService.getFirstPerson()
+    fun getNextPersonInfo(): ResponseEntity<Map<String, Any>> {
+        val info = personConsumerService.getFirstPersonWithCard()
 
-        return if (person != null) {
+        return if (info != null) {
             ResponseEntity.ok(mapOf(
                 "status" to "success",
-                "data" to person
+                "data" to info
             ))
         } else {
             ResponseEntity.ok(mapOf(

@@ -19,7 +19,7 @@ dependencies {
     implementation("org.hibernate:hibernate-core:6.3.1.Final")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-
+    implementation("org.postgresql:postgresql:42.7.2")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -32,6 +32,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.mockk:mockk:1.13.8")
     testImplementation("com.ninja-squad:springmockk:4.0.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
 
 
 }

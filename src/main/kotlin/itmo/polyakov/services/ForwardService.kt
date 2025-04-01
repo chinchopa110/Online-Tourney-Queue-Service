@@ -19,5 +19,3 @@ class ForwardService(private val kafkaTemplate: KafkaTemplate<String, Any>) {
         kafkaTemplate.send(CARD_PERSON_TOPIC, person.id, combinedData)
     }
 }
-
-// TODO: подумать над outbox

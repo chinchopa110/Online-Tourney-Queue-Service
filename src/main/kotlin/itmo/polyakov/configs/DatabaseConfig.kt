@@ -1,19 +1,22 @@
-package itmo.polyakov.config
+package itmo.polyakov.configs
 
-import org.springframework.boot.context.properties.ConfigurationProperties
+import com.zaxxer.hikari.HikariDataSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import javax.sql.DataSource
-import org.springframework.boot.jdbc.DataSourceBuilder
 
 @Configuration
 @EnableJpaRepositories(basePackages = ["itmo.polyakov.repositories"])
 class DatabaseConfig {
 
     @Bean
-    @ConfigurationProperties(prefix = "spring.datasource")
     fun dataSource(): DataSource {
-        return DataSourceBuilder.create().build()
+        return HikariDataSource().apply {
+            jdbcUrl = "jdbc:postgresql://localhost:5432/card_db"
+            username = "postgres"
+            password = "123"
+            driverClassName = "org.postgresql.Driver"
+        }
     }
 }
