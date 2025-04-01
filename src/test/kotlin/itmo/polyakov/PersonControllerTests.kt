@@ -1,9 +1,10 @@
-package itmo.polyakov.controllers
+package itmo.polyakov
 
 import io.mockk.coEvery
 import io.mockk.mockk
 import itmo.polyakov.DTO.Card
 import itmo.polyakov.DTO.Person
+import itmo.polyakov.controllers.PersonController
 import itmo.polyakov.services.PersonConsumerService
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals

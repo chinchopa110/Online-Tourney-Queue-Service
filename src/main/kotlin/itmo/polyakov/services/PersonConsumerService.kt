@@ -1,9 +1,13 @@
 package itmo.polyakov.services
 
+import itmo.polyakov.DTO.Card
 import itmo.polyakov.DTO.Person
 import jakarta.annotation.PreDestroy
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
+import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 
@@ -12,22 +16,27 @@ class PersonConsumerService(
     private val cardService: CardService,
     private val forwardService: ForwardService
 ) {
-    private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private val combinedDataChannel = Channel<Map<String, Any>>(capacity = Channel.UNLIMITED)
+    private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val logger = LoggerFactory.getLogger(PersonConsumerService::class.java)
+    private val combinedDataChannel = Channel<Map<String, Any>>(
+        capacity = 10000,
+        onBufferOverflow = BufferOverflow.SUSPEND
+    )
+    private val limitedParallelism = Dispatchers.IO.limitedParallelism(100)
 
     @KafkaListener(topics = ["queue"], groupId = "person-consumer-group")
-    fun consume(person: Person) {
+    suspend fun consume(person: Person) = withContext(limitedParallelism) {
         coroutineScope.launch {
             try {
                 processPersonWithCard(person)
             } catch (e: Exception) {
-                println("Error processing person ${person.id}: ${e.message}")
+                logger.info("Error processing person ${person.id}: ${e.message}")
             }
         }
     }
 
-    private suspend fun processPersonWithCard(person: Person) {
+    private suspend fun processPersonWithCard(person: Person)  {
         val cardDeferred = coroutineScope.async {
             cardService.getCardByPersonId(person.id)
         }
@@ -45,7 +54,7 @@ class PersonConsumerService(
                 forwardService.sendCombinedData(person, card)
             }
         } else {
-            println("No card found for person ${person.id}")
+            logger.info("No card found for person ${person.id}")
         }
     }
 
@@ -55,7 +64,12 @@ class PersonConsumerService(
 
     @PreDestroy
     fun cleanup() {
-        coroutineScope.cancel()
-        combinedDataChannel.close()
+        runBlocking {
+            coroutineScope.cancel()
+            combinedDataChannel.consumeEach {
+                forwardService.sendCombinedData(it["person"] as Person, it["card"] as Card)
+            }
+            combinedDataChannel.close()
+        }
     }
 }
